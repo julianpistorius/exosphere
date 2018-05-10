@@ -1,6 +1,7 @@
 module State exposing (init, subscriptions, update)
 
 import Time
+import Toast exposing (Toast)
 import Helpers
 import Types.Types exposing (..)
 import Rest
@@ -22,6 +23,8 @@ init =
                 "default"
                 "demo"
                 ""
+      , time = 0
+      , toast = Toast.init
       }
     , Cmd.none
     )
@@ -29,25 +32,59 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Time.every (10 * Time.second) Tick
+    Time.every (1 * Time.second) Tick
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Tick _ ->
-            case model.viewState of
-                NonProviderView _ ->
-                    ( model, Cmd.none )
+        Tick newTime ->
+            let
+                newToast =
+                    Toast.updateTimestamp newTime model.toast
 
-                ProviderView providerName ListProviderServers ->
-                    update (ProviderMsg providerName RequestServers) model
+                updatedModel =
+                    Helpers.updateTime newTime model |> Helpers.updateToast newToast
 
-                ProviderView providerName (ServerDetail serverUuid) ->
-                    update (ProviderMsg providerName (RequestServerDetail serverUuid)) model
+                seconds =
+                    round (newTime / 1000)
 
-                _ ->
-                    ( model, Cmd.none )
+                isMultipleOfTenSeconds =
+                    seconds % 10 == 0
+
+                _ =
+                    Debug.log "debug 56:" seconds
+
+                _ =
+                    Debug.log "debug 59:" isMultipleOfTenSeconds
+            in
+                case isMultipleOfTenSeconds of
+                    True ->
+                        case model.viewState of
+                            NonProviderView _ ->
+                                ( updatedModel, Cmd.none )
+
+                            ProviderView providerName ListProviderServers ->
+                                update (ProviderMsg providerName RequestServers) updatedModel
+
+                            ProviderView providerName (ServerDetail serverUuid) ->
+                                update (ProviderMsg providerName (RequestServerDetail serverUuid)) updatedModel
+
+                            _ ->
+                                ( updatedModel, Cmd.none )
+
+                    False ->
+                        ( updatedModel, Cmd.none )
+
+        Postnotification notification ->
+            let
+                newToastNotification =
+                    Toast.createNotification notification (model.time + Time.second * 3)
+
+                newToast =
+                    Toast.addNotification newToastNotification model.toast
+            in
+                ( Helpers.updateToast newToast model, Cmd.none )
 
         SetNonProviderView nonProviderViewConstructor ->
             let

@@ -3,6 +3,7 @@ module Types.Types exposing (..)
 import Http
 import Time
 import Types.HelperTypes as HelperTypes
+import Toast exposing (Toast)
 
 
 {- App-Level Types -}
@@ -13,6 +14,8 @@ type alias Model =
     , viewState : ViewState
     , providers : List Provider
     , creds : Creds
+    , time : Time.Time
+    , toast : Toast String
     }
 
 
@@ -37,6 +40,7 @@ type Msg
     | ProviderMsg ProviderName ProviderSpecificMsgConstructor
     | InputLoginField LoginField
     | InputCreateServerField CreateServerRequest CreateServerField
+    | Postnotification String
 
 
 type ProviderSpecificMsgConstructor

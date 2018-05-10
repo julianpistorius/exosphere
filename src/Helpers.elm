@@ -1,10 +1,22 @@
-module Helpers exposing (processError, processOpenRc, providerNameFromUrl, serviceCatalogToEndpoints, getExternalNetwork, checkFloatingIpState, serverLookup, providerLookup, flavorLookup, imageLookup, modelUpdateProvider)
+module Helpers exposing (processError, processOpenRc, providerNameFromUrl, serviceCatalogToEndpoints, getExternalNetwork, checkFloatingIpState, serverLookup, providerLookup, flavorLookup, imageLookup, modelUpdateProvider, updateToast, updateTime)
 
-import Regex
 import Maybe.Extra
+import Regex
+import Time
+import Toast exposing (Toast)
 import Types.HelperTypes as HelperTypes
 import Types.Types exposing (..)
 import Types.OpenstackTypes as OpenstackTypes
+
+
+updateToast : Toast String -> Model -> Model
+updateToast toast model =
+    { model | toast = toast }
+
+
+updateTime : Time.Time -> Model -> Model
+updateTime time model =
+    { model | time = time }
 
 
 processError : Model -> a -> ( Model, Cmd Msg )
